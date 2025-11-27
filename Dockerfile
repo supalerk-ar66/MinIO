@@ -5,11 +5,11 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# ติดตั้ง dependencies
+# Install dependencies
 COPY package*.json ./
 RUN npm install
 
-# คัดลอก source code แล้ว build
+# Copy source and build
 COPY . .
 RUN npm run build
 
@@ -20,11 +20,11 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-# ติดตั้งเฉพาะ production dependencies
+# Install production dependencies
 COPY package*.json ./
 RUN npm install --omit=dev
 
-# ดึงไฟล์ build จาก stage แรก
+# Copy built output from the build stage
 COPY --from=builder /app/.output ./.output
 
 ENV NODE_ENV=production
