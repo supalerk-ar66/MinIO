@@ -13,21 +13,19 @@
     "postinstall": "prisma generate && nuxt prepare"
   },
   "dependencies": {
-    "archiver": "^7.0.1",
+    "@nuxt/ui": "^4.2.1",
     "@prisma/client": "^5.10.1",
+    "archiver": "^7.0.1",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.2",
     "minio": "^8.0.6",
     "nuxt": "^4.2.1"
   },
   "devDependencies": {
-    "prisma": "^5.10.1",
-    "@oxc-minify/binding-linux-x64-gnu": "^0.96.0",
-    "@oxc-parser/binding-linux-x64-gnu": "^0.96.0",
-    "@oxc-transform/binding-linux-x64-gnu": "^0.96.0",
     "@types/archiver": "^7.0.0",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^24.10.1",
+    "prisma": "^5.10.1",
     "typescript": "^5.9.3"
   },
   "version": "1.0.0",
