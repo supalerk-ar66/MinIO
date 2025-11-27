@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// Example model for seeding users. Adjust fields as needed.
+model User {
+  id            String         @id @default(cuid())
+  username      String         @unique
+  email         String?
+  password      String
+  role          String
+  createdAt     DateTime       @default(now())
+  refreshTokens RefreshToken[]
+  fileMetas     FileMeta[]
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  hash      String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model FileMeta {
+  id        String   @id @default(cuid())
+  bucket    String
+  objectKey String
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@unique([bucket, objectKey])
+  @@index([bucket])
+}
