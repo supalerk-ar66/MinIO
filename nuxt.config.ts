@@ -10,8 +10,15 @@ export default defineNuxtConfig({
     jwtSecret: process.env.JWT_SECRET || 'dev-secret-key-change-in-production',
     jwtExpiry: process.env.JWT_EXPIRY || '1h',
     refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || '7d',
-    jwtPrivateKeyPath: process.env.JWT_PRIVATE_KEY_PATH || './secret',
-    jwtPublicKeyPath: process.env.JWT_PUBLIC_KEY_PATH || './secret.pub.pem',
+    // Use RSA keys if provided; otherwise fall back to shared secret for HS256 in dev
+    jwtPrivateKeyPath:
+      process.env.JWT_PRIVATE_KEY_PATH ||
+      process.env.JWT_SECRET ||
+      'dev-secret-key-change-in-production',
+    jwtPublicKeyPath:
+      process.env.JWT_PUBLIC_KEY_PATH ||
+      process.env.JWT_SECRET ||
+      'dev-secret-key-change-in-production',
   },
 
   // กัน warning compatibilityDate ของ Nitro
