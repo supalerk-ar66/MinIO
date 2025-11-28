@@ -3,6 +3,7 @@ import { minioClient } from '~/server/utils/minioClient'
 import { requireAuth } from '~/server/middleware/auth'
 import { prisma } from '~/server/utils/prisma'
 import { handleMinioBucketError } from '~/server/utils/minioErrors'
+import { esClient, ensureElasticSetup, FILES_INDEX, FILE_PIPELINE_ID } from '~/server/utils/elastic'
 
 const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 
@@ -26,6 +27,8 @@ export default defineEventHandler(async (event) => {
     if (!files?.length) {
       throw createError({ statusCode: 400, message: 'No files uploaded' })
     }
+
+    await ensureElasticSetup().catch(() => {}) // best-effort; ignore if ES unavailable
 
     for (const file of files) {
       const relativePath =
@@ -51,6 +54,31 @@ export default defineEventHandler(async (event) => {
           userId: auth.sub,
         },
       })
+
+      // best-effort index into Elasticsearch (attachment pipeline)
+      const base64 = Buffer.from(file.data).toString('base64')
+      const extension = relativePath.split('.').pop()?.toLowerCase() || ''
+      const filename = relativePath.split('/').pop() || relativePath
+      const updatedAt = new Date().toISOString()
+
+      esClient
+        .index({
+          index: FILES_INDEX,
+          id: `${bucket}:${relativePath}`,
+          pipeline: FILE_PIPELINE_ID,
+          document: {
+            bucket,
+            key: relativePath,
+            path: relativePath,
+            filename,
+            ownerId: auth.sub,
+            size: file.data.length,
+            extension,
+            updatedAt,
+            data: base64,
+          },
+        })
+        .catch(() => {})
     }
 
     return { ok: true }

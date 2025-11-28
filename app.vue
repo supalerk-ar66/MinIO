@@ -9,7 +9,7 @@
 
         <!-- SIDEBAR -->
         <aside class="sidebar">
-          <div class="brand">🗂️ Market</div>
+          <div class="brand">🗂️ MinIO</div>
 
           <nav class="nav">
             <NuxtLink to="/" class="nav-item" exact-active-class="active">

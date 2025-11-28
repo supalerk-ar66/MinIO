@@ -1,4 +1,6 @@
 // nuxt.config.ts
+import { defineNuxtConfig } from 'nuxt/config'
+
 export default defineNuxtConfig({
   // Enable Nuxt DevTools only when explicitly requested via env var.
   // This avoids DevTools trying to register workspace/filesystem entries
@@ -23,9 +25,9 @@ export default defineNuxtConfig({
     minioWebhookSecret: process.env.MINIO_WEBHOOK_SECRET || '',
   },
 
-  // กัน warning compatibilityDate ของ Nitro
+  // Nitro compatibility
   nitro: {
-    compatibilityDate: '2025-11-21'
+    compatibilityDate: '2025-11-28'
   },
 
   app: {

@@ -6,7 +6,18 @@ export default defineEventHandler(async (event) => {
   const user = requireAuth(event)
   const q = (getQuery(event).q as string | undefined) || ''
 
-  await ensureElasticSetup()
+  try {
+    await ensureElasticSetup()
+  } catch (err: any) {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Search backend unavailable',
+      data: {
+        message: err?.message || 'Failed to reach Elasticsearch',
+        hint: 'ตรวจสอบ ELASTICSEARCH_NODE และให้ Elasticsearch รันอยู่',
+      },
+    })
+  }
 
   const must = q
     ? [
@@ -29,38 +40,49 @@ export default defineEventHandler(async (event) => {
           },
         ]
 
-  const res = await esClient.search({
-    index: FILES_INDEX,
-    size: 20,
-    query: {
-      bool: {
-        must,
-        filter,
+  try {
+    const res = await esClient.search({
+      index: FILES_INDEX,
+      size: 20,
+      query: {
+        bool: {
+          must,
+          filter,
+        },
       },
-    },
-    highlight: {
-      fields: {
-        'attachment.content': { fragment_size: 120, number_of_fragments: 1 },
+      highlight: {
+        fields: {
+          'attachment.content': { fragment_size: 120, number_of_fragments: 1 },
+        },
       },
-    },
-    _source: ['bucket', 'key', 'filename', 'ownerId', 'updatedAt', 'path', 'attachment'],
-  })
+      _source: ['bucket', 'key', 'filename', 'ownerId', 'updatedAt', 'path', 'attachment'],
+    })
 
-  const items = res.hits.hits.map((hit: any) => {
-    const source = hit._source || {}
-    return {
-      id: hit._id,
-      bucket: source.bucket,
-      key: source.key,
-      filename: source.filename || source.key,
-      updatedAt: source.updatedAt,
-      snippet:
-        hit.highlight?.['attachment.content']?.[0] ||
-        source.attachment?.content?.slice(0, 200) ||
-        '',
-      path: source.path || source.key,
-    }
-  })
+    const items = res.hits.hits.map((hit: any) => {
+      const source = hit._source || {}
+      return {
+        id: hit._id,
+        bucket: source.bucket,
+        key: source.key,
+        filename: source.filename || source.key,
+        updatedAt: source.updatedAt,
+        snippet:
+          hit.highlight?.['attachment.content']?.[0] ||
+          source.attachment?.content?.slice(0, 200) ||
+          '',
+        path: source.path || source.key,
+      }
+    })
 
-  return { items }
+    return { items }
+  } catch (err: any) {
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Search backend unavailable',
+      data: {
+        message: err?.message || 'Failed to query Elasticsearch',
+        hint: 'ตรวจสอบว่า Elasticsearch รันอยู่และปลั๊กอิน ingest-attachment พร้อมใช้งาน',
+      },
+    })
+  }
 })
