@@ -19,6 +19,8 @@ export default defineNuxtConfig({
       process.env.JWT_PUBLIC_KEY_PATH ||
       process.env.JWT_SECRET ||
       'dev-secret-key-change-in-production',
+    elasticNode: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
+    minioWebhookSecret: process.env.MINIO_WEBHOOK_SECRET || '',
   },
 
   // กัน warning compatibilityDate ของ Nitro

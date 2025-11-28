@@ -16,6 +16,10 @@
               📦 Buckets
             </NuxtLink>
 
+            <NuxtLink to="/search" class="nav-item" active-class="active">
+              🔍 Search
+            </NuxtLink>
+
             <NuxtLink to="/profile" class="nav-item" active-class="active">
               👥 Profile
             </NuxtLink>
@@ -91,6 +95,7 @@ const role = computed(() => auth.user?.value?.role ?? '')
 // ชื่อหน้า (โชว์บน topbar)
 const pageTitle = computed(() => {
   if (route.path === '/') return '📦 Buckets'
+  if (route.path.startsWith('/search')) return '🔍 Search'
   if (route.path.includes('bucket')) return '📂 Files'
   if (route.path.includes('profile')) return '👥 Profile'
   return 'Dashboard'
