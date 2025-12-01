@@ -9,7 +9,7 @@ const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 
 // POST /api/bucket/:bucket/files — อัปโหลดไฟล์/โฟลเดอร์เข้า bucket
 export default defineEventHandler(async (event) => {
-  const auth = requireAuth(event)
+  const auth = await requireAuth(event)
 
   const bucket = getRouterParam(event, 'bucket')
   if (!bucket) throw createError({ statusCode: 400, message: 'Missing bucket' })
@@ -46,12 +46,12 @@ export default defineEventHandler(async (event) => {
           },
         },
         update: {
-          userId: auth.sub,
+          userId: auth.user.id,
         },
         create: {
           bucket,
           objectKey: relativePath,
-          userId: auth.sub,
+          userId: auth.user.id,
         },
       })
 
@@ -71,7 +71,7 @@ export default defineEventHandler(async (event) => {
             key: relativePath,
             path: relativePath,
             filename,
-            ownerId: auth.sub,
+            ownerId: auth.user.id,
             size: file.data.length,
             extension,
             updatedAt,

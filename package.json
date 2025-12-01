@@ -13,11 +13,12 @@
     "postinstall": "prisma generate && nuxt prepare"
   },
   "dependencies": {
+    "@elastic/elasticsearch": "^8.15.0",
     "@nuxt/ui": "^4.2.1",
     "@prisma/client": "^5.10.1",
-    "@elastic/elasticsearch": "^8.15.0",
     "archiver": "^7.0.1",
     "bcryptjs": "^3.0.3",
+    "jose": "^6.1.2",
     "jsonwebtoken": "^9.0.2",
     "minio": "^8.0.6",
     "nuxt": "^4.2.1"

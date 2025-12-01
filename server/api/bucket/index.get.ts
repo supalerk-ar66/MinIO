@@ -5,7 +5,7 @@ import { requireRole } from '~/server/middleware/auth'
 // GET /api/bucket — admin-only bucket list
 // Return shape must stay compatible with frontend (array of bucket names)
 export default defineEventHandler(async (event) => {
-  requireRole(event, 'admin')
+  await requireRole(event, 'admin')
 
   try {
     const buckets = await minioClient.listBuckets()

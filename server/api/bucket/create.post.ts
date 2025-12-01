@@ -5,7 +5,7 @@ import { requireRole } from '~/server/middleware/auth'
 const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 
 export default defineEventHandler(async (event) => {
-  requireRole(event, 'admin')
+  await requireRole(event, 'admin')
 
   const body = await readBody(event)
   const name = String(body?.name || '').toLowerCase()

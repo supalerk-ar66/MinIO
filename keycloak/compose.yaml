@@ -1,0 +1,18 @@
+services:    
+  sso:
+    # user: 1000:1000
+    image: quay.io/keycloak/keycloak:26.4.6
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      # - ./data_keycloak:/opt/keycloak/data
+    command:
+      - start-dev
+      # - --features=token-exchange,organization
+      # - --hostname-url=http://192.168.2.101:3022
+    environment:
+      - KC_BOOTSTRAP_ADMIN_USERNAME=admin
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=admin
+      - TZ=Asia/Bangkok
+    ports:
+      - "3022:8080"

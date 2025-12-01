@@ -1,0 +1,152 @@
+### Admin REST API
+### https://www.keycloak.org/docs-api/latest/rest-api/index.html
+
+@host = http://localhost:3022
+@token = put_token_here
+@realm = sso
+@username = boss
+@user_uuid = 4e042033-e491-4b79-8a72-7b889a15826e
+@client_id = express-client
+@client_uuid = 12c8cd99-a5ec-4461-8ce9-52445d29ff14
+@realm_role = super
+@client_role = dev
+
+
+############ Login
+### Login for realms user
+POST {{host}}/realms/sso/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id={{client_id}}
+&username=boss
+&password=boss
+&grant_type=password
+
+### Login by admin of master realms
+POST {{host}}/realms/master/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=admin-cli
+&username=admin
+&password=admin
+&grant_type=password
+
+### Login by secret of realms (server to server)
+POST {{host}}/realms/{{realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+client_id=b2b-client
+&client_secret=WFt4eLKgp3wXx14jE95fRnf1WxVWe1ZS
+&grant_type=client_credentials
+
+######### Realms
+### get realms list and info(config)
+GET {{host}}/admin/realms
+Authorization: Bearer {{token}}
+### Get a realm info(configX
+GET {{host}}/admin/realms/{{realm}}
+Authorization: Bearer {{token}}
+### public key of realm
+GET {{host}}/realms/{{realm}}
+
+################### Realms Role
+
+### Get role mappings list of Realms and Client
+GET {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}/role-mappings
+Authorization: Bearer {{token}}
+
+### Get realm-level roles that avaliable to a user
+GET {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}/role-mappings/realm/available
+Authorization: Bearer {{token}}
+
+### Get realm-level role mappings
+GET {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}/role-mappings/realm
+Authorization: Bearer {{token}}
+
+### Get realm-level role mappings
+GET {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}/role-mappings/realm
+Authorization: Bearer {{token}}
+
+### Get a role by name
+GET {{host}}/admin/realms/{{realm}}/roles/{{realm_role}}
+Authorization: Bearer {{token}}
+
+### Add realm-level role mappings to the user
+POST {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}/role-mappings/realm
+Authorization: Bearer {{token}}
+
+[
+  {
+    "id": "bca08238-4c48-4243-8aca-318591c2ddc0",
+    "name": "super"
+  }
+]
+
+
+
+################### User
+### Get users in realms
+GET {{host}}/admin/realms/{{realm}}/users
+Authorization: Bearer {{token}}
+### Get a users in realms
+GET {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}
+Authorization: Bearer {{token}}
+### search by username (oom will match oom1, ooom2)
+GET {{host}}/admin/realms/{{realm}}/users/?username={{username}}
+Authorization: Bearer {{token}}
+
+### Create user in realms
+POST {{host}}/admin/realms/{{realm}}/users
+Authorization: Bearer {{token}}
+
+{
+    "username":"oom2",
+    "email":"oom2@xxx.com",
+    "enabled":true,
+    "credentials":[
+        {
+            "temporary":false,
+            "type":"password",
+            "value":"oom2"
+        }
+    ]
+}
+### Delete user
+DELETE {{host}}/admin/realms/sso/users/{{{user_uuid}}}
+Authorization: Bearer {{token}}
+
+
+########## Client
+### Get list of client in a realm
+### search one append /{{client_uuid}} or /?clientId={{client_id}}
+GET {{host}}/admin/realms/{{realm}}/clients
+Authorization: Bearer {{token}}
+
+######## Client Roles 
+### Get role list in client
+GET {{host}}/admin/realms/{{realm}}/clients/{{client_uuid}}/roles
+Authorization: Bearer {{token}}
+
+### Role list avaliable for a user
+GET {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}/role-mappings/clients/{{client_uuid}}/available
+Authorization: Bearer {{token}}
+
+### Get a role by name
+GET {{host}}/admin/realms/{{realm}}/clients/{{client_uuid}}/roles/{{client_role}}
+Authorization: Bearer {{token}}
+
+### assign client role (required id and name)
+POST {{host}}/admin/realms/{{realm}}/users/{{user_uuid}}/role-mappings/clients/{{client_uuid}}
+Authorization: Bearer {{token}}
+
+[
+  {
+  "id": "6f2fb8a6-7e68-4723-ba84-36d1b45ef23d",
+  "name": "dev",
+  "description": "",
+  "composite": false,
+  "clientRole": true,
+  "containerId": "12c8cd99-a5ec-4461-8ce9-52445d29ff14",
+  "attributes": {}
+  }
+]

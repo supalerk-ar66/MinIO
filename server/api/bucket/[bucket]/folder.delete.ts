@@ -9,7 +9,7 @@ const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 // DELETE /api/bucket/:bucket/folder?prefix=path/ — ลบโฟลเดอร์ (และไฟล์ทั้งหมดภายใน)
 // User permissions: allow delete only if every object under prefix belongs to current user (FileMeta.userId)
 export default defineEventHandler(async (event) => {
-  const auth = requireAuth(event)
+  const auth = await requireAuth(event)
 
   const bucket = getRouterParam(event, 'bucket')
   if (!bucket) throw createError({ statusCode: 400, message: 'Missing bucket' })
@@ -38,14 +38,16 @@ export default defineEventHandler(async (event) => {
       return { ok: true, deleted: 0 }
     }
 
-    if (auth.role !== 'admin') {
+    if (auth.user.role !== 'admin') {
       const metas = await prisma.fileMeta.findMany({
         where: {
           bucket,
           objectKey: { in: keys },
         },
       })
-      const allowed = new Set(metas.filter((m) => m.userId === auth.sub).map((m) => m.objectKey))
+      const allowed = new Set(
+        metas.filter((m) => m.userId === auth.user.id).map((m) => m.objectKey)
+      )
       for (const key of keys) {
         if (!allowed.has(key)) {
           throw createError({

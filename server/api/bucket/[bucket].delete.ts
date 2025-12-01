@@ -7,7 +7,7 @@ const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 
 // DELETE /api/bucket/:bucket — ลบทั้ง bucket (เฉพาะ admin) โดย purge ไฟล์ก่อน
 export default defineEventHandler(async (event) => {
-  requireRole(event, 'admin')
+  await requireRole(event, 'admin')
 
   const bucket = getRouterParam(event, 'bucket')
   if (!bucket) {

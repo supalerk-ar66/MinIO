@@ -5,7 +5,7 @@ import { requireRole } from '~/server/middleware/auth'
 
 export default defineEventHandler(async (event) => {
   // Only admin can create buckets
-  requireRole(event, 'admin')
+  await requireRole(event, 'admin')
 
   const { bucketName } = await readBody(event)
 

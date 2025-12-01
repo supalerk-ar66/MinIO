@@ -8,7 +8,7 @@ const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 
 // GET /api/bucket/:bucket/files — รายการไฟล์ภายใน bucket (auth ทั้ง admin/user)
 export default defineEventHandler(async (event) => {
-  const auth = requireAuth(event)
+  const auth = await requireAuth(event)
 
   const bucket = getRouterParam(event, 'bucket')
   if (!bucket) throw createError({ statusCode: 400, message: 'Missing bucket' })
@@ -69,8 +69,8 @@ export default defineEventHandler(async (event) => {
       const ownerId = meta?.userId ?? null
       const ownerName = meta?.user?.username ?? null
       const ownerRole = meta?.user?.role ?? null
-      const isOwner = !!ownerId && ownerId === auth.sub
-      const canModify = auth.role === 'admin' || isOwner
+      const isOwner = !!ownerId && ownerId === auth.user.id
+      const canModify = auth.user.role === 'admin' || isOwner
       return {
         ...item,
         ownerId,

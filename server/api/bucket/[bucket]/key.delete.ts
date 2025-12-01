@@ -8,7 +8,7 @@ const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 
 // DELETE /api/bucket/:bucket/key?key=... — ลบไฟล์เดี่ยวภายใน bucket
 export default defineEventHandler(async (event) => {
-  const auth = requireAuth(event)
+  const auth = await requireAuth(event)
 
   const bucket = getRouterParam(event, 'bucket')
   if (!bucket) throw createError({ statusCode: 400, message: 'Missing bucket' })
@@ -36,8 +36,8 @@ export default defineEventHandler(async (event) => {
       },
     })
 
-    if (auth.role !== 'admin') {
-      if (!fileMeta || fileMeta.userId !== auth.sub) {
+    if (auth.user.role !== 'admin') {
+      if (!fileMeta || fileMeta.userId !== auth.user.id) {
         throw createError({ statusCode: 403, message: 'You cannot delete this file' })
       }
     }

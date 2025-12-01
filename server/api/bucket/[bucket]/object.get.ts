@@ -7,7 +7,7 @@ const BUCKET_NAME_REGEX = /^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$/
 
 // GET /api/bucket/:bucket/object?key=... — ดาวน์โหลดไฟล์เดี่ยว (ส่ง stream)
 export default defineEventHandler(async (event) => {
-  requireAuth(event)
+  await requireAuth(event)
 
   const bucket = getRouterParam(event, 'bucket')
   if (!bucket) throw createError({ statusCode: 400, message: 'Missing bucket' })

@@ -1,33 +1,43 @@
 import { defineEventHandler, getHeader, createError } from 'h3'
-import { verifyJWT } from '~/server/utils/jwt'
+import { getKeycloakConfig, keycloakPayloadToUser, verifyAccessToken, AuthUser } from '~/server/utils/keycloak'
 
-export function useAuthMiddleware(event: any) {
+export interface AuthContext {
+  token: string
+  payload: any
+  user: AuthUser
+}
+
+export async function useAuthMiddleware(event: any): Promise<AuthContext | null> {
   const header = getHeader(event, 'authorization') || getHeader(event, 'Authorization')
   if (!header) return null
 
   const token = header.startsWith('Bearer ') ? header.slice(7) : header
-  const config = useRuntimeConfig()
-  const pubKey = config.jwtPublicKeyPath
 
-  const payload = verifyJWT(token, pubKey)
-  return payload
+  const kc = getKeycloakConfig()
+  const payload = await verifyAccessToken(token, kc)
+  if (!payload) return null
+
+  const user = keycloakPayloadToUser(payload)
+  const ctx: AuthContext = { token, payload: { ...payload, role: user.role }, user }
+  event.context.auth = ctx
+  return ctx
 }
 
-export function requireAuth(event: any) {
-  const payload = useAuthMiddleware(event)
-  if (!payload) {
+export async function requireAuth(event: any): Promise<AuthContext> {
+  const auth = await useAuthMiddleware(event)
+  if (!auth) {
     throw createError({ statusCode: 401, message: 'Unauthorized' })
   }
-  return payload
+  return auth
 }
 
-export function requireRole(event: any, roles: 'admin' | 'user' | 'admin|user') {
-  const payload = requireAuth(event)
+export async function requireRole(event: any, roles: 'admin' | 'user' | 'admin|user') {
+  const auth = await requireAuth(event)
   const allow = roles.split('|')
-  if (!allow.includes(payload.role)) {
+  if (!allow.includes(auth.user.role)) {
     throw createError({ statusCode: 403, message: 'Forbidden' })
   }
-  return payload
+  return auth
 }
 
 export default defineEventHandler(() => {})

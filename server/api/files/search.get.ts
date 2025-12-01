@@ -3,7 +3,7 @@ import { esClient, ensureElasticSetup, FILES_INDEX } from '~/server/utils/elasti
 import { requireAuth } from '~/server/middleware/auth'
 
 export default defineEventHandler(async (event) => {
-  const user = requireAuth(event)
+  const auth = await requireAuth(event)
   const q = (getQuery(event).q as string | undefined) || ''
 
   try {
@@ -32,11 +32,11 @@ export default defineEventHandler(async (event) => {
     : [{ match_all: {} }]
 
   const filter =
-    user.role === 'admin'
+    auth.user.role === 'admin'
       ? []
       : [
           {
-            term: { ownerId: user.sub },
+            term: { ownerId: auth.user.id },
           },
         ]
 

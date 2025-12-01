@@ -9,6 +9,12 @@ export default defineNuxtConfig({
 
   // Runtime config for sensitive values
   runtimeConfig: {
+    keycloakBaseUrl: process.env.KEYCLOAK_BASE_URL || 'http://localhost:3022',
+    keycloakRealm: process.env.KEYCLOAK_REALM || 'sso',
+    keycloakClientId: process.env.KEYCLOAK_CLIENT_ID || 'express-client',
+    keycloakClientSecret: process.env.KEYCLOAK_CLIENT_SECRET || '',
+    authCookieSecure:
+      process.env.AUTH_COOKIE_SECURE === 'true' || process.env.NODE_ENV === 'production',
     jwtSecret: process.env.JWT_SECRET || 'dev-secret-key-change-in-production',
     jwtExpiry: process.env.JWT_EXPIRY || '1h',
     refreshTokenExpiry: process.env.REFRESH_TOKEN_EXPIRY || '7d',
