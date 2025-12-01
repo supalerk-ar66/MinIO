@@ -36,6 +36,10 @@ export default defineEventHandler(async (event) => {
           ? file.filename // e.g. folder1/folder2/img.png
           : file.filename || 'file'
 
+      // Avoid FK errors when Keycloak user is not persisted locally
+      const userRecord = await prisma.user.findUnique({ where: { id: auth.user.id } })
+      const ownerId = userRecord ? auth.user.id : null
+
       await minioClient.putObject(bucket, relativePath, file.data)
 
       await prisma.fileMeta.upsert({
@@ -46,12 +50,12 @@ export default defineEventHandler(async (event) => {
           },
         },
         update: {
-          userId: auth.user.id,
+          userId: ownerId,
         },
         create: {
           bucket,
           objectKey: relativePath,
-          userId: auth.user.id,
+          userId: ownerId,
         },
       })
 

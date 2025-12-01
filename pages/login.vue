@@ -44,14 +44,14 @@
         {{ error }}
       </div>
 
-      <div class="login-footer">
+      <!-- <div class="login-footer">
         <p>Demo Credentials:</p>
         <ul>
           <li><strong>Admin:</strong> admin / admin123</li>
           <li><strong>User:</strong> user / user123</li>
           <li><strong>User2:</strong> user2/ user2123</li>
         </ul>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

@@ -150,9 +150,30 @@ export async function verifyAccessToken(token: string, kc: KeycloakConfig) {
       audience: kc.clientId,
     })
     return payload
-  } catch {
-    return null
+  } catch (err: any) {
+    // Fallback: if audience mismatch, verify issuer only then manually check aud/azp
+    try {
+      const { payload } = await jwtVerify(token, jwks!, {
+        issuer: kc.issuer,
+      })
+      if (isAudienceAllowed(payload, kc.clientId)) return payload
+      return null
+    } catch {
+      return null
+    }
   }
+}
+
+function isAudienceAllowed(payload: JWTPayload, clientId: string) {
+  const aud = payload.aud
+  const azp = (payload as any).azp
+  if (Array.isArray(aud)) {
+    if (aud.includes(clientId) || aud.includes('account')) return true
+  } else if (typeof aud === 'string') {
+    if (aud === clientId || aud === 'account') return true
+  }
+  if (azp === clientId) return true
+  return false
 }
 
 export function keycloakPayloadToUser(payload: JWTPayload, fallbackInfo?: any): AuthUser {

@@ -110,9 +110,9 @@
           <tr v-for="file in visibleFiles" :key="file.key">
             <td>{{ getDisplayName(file) }}</td>
             <td>
-              <a :href="file.url" target="_blank" rel="noopener noreferrer">
+              <button class="link-button" type="button" @click="openFile(file)">
                 {{ getDisplayName(file) }}
-              </a>
+              </button>
             </td>
             <td>{{ (file.size / 1024).toFixed(1) }}</td>
             <td>{{ formatDate(file.mtime) }}</td>
@@ -332,11 +332,35 @@ const deleteFolder = async (folder: string) => {
 
 /* ---------- download ---------- */
 const downloadFile = (file: FileItem) => {
+  fetchFile(file, true).catch((err) =>
+    alert(err?.data?.message || err?.message || 'Download failed')
+  )
+}
+
+// Open in new tab using authorized fetch to avoid Nuxt router intercepting /api/ URLs
+const openFile = (file: FileItem) => {
+  fetchFile(file, false).catch((err) =>
+    alert(err?.data?.message || err?.message || 'Open file failed')
+  )
+}
+
+async function fetchFile(file: FileItem, forceDownload: boolean) {
   const key = encodeURIComponent(file.key)
+  const url = `/api/bucket/${encodeURIComponent(bucketName.value)}/object?key=${key}`
+
+  const blob = await api.get(url, { responseType: 'blob' })
+  const blobUrl = URL.createObjectURL(blob as any)
+
   const a = document.createElement('a')
-  a.href = `/api/bucket/${encodeURIComponent(bucketName.value)}/object?key=${key}`
-  a.download = getDisplayName(file)
+  a.href = blobUrl
+  if (forceDownload) {
+    a.download = getDisplayName(file)
+  } else {
+    a.target = '_blank'
+    a.rel = 'noopener noreferrer'
+  }
   a.click()
+  setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
 }
 
 /* ---------- share link ---------- */

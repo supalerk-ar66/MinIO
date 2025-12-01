@@ -45,10 +45,19 @@ export default defineEventHandler(async (event) => {
           objectKey: { in: keys },
         },
       })
+
+      // Allow delete if file is owned by current user or has no owner (legacy/null records)
       const allowed = new Set(
-        metas.filter((m) => m.userId === auth.user.id).map((m) => m.objectKey)
+        metas
+          .filter((m) => !m.userId || m.userId === auth.user.id)
+          .map((m) => m.objectKey)
       )
+
       for (const key of keys) {
+        // If there is no meta entry at all, allow deletion (no ownership recorded)
+        const hasMeta = metas.some((m) => m.objectKey === key)
+        if (!hasMeta) continue
+
         if (!allowed.has(key)) {
           throw createError({
             statusCode: 403,

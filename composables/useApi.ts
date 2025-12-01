@@ -4,7 +4,11 @@ export const useApi = () => {
 
   const request = async (url: string, options: any = {}) => {
     const headers: Record<string, string> = { ...(options.headers || {}) }
-    const hadToken = !!accessToken.value // track whether this call actually sent a token
+
+    // If we don't have an access token in memory, try to refresh using the cookie before the first call
+    if (!accessToken.value) {
+      await refreshAccessToken().catch(() => {})
+    }
 
     if (accessToken.value) {
       headers.Authorization = `Bearer ${accessToken.value}`
@@ -16,7 +20,7 @@ export const useApi = () => {
         headers
       })
     } catch (err: any) {
-      if (err?.status === 401 && hadToken) {
+      if (err?.status === 401) {
         const ok = await refreshAccessToken()
         if (!ok) {
           logout()

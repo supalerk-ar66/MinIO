@@ -55,7 +55,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import '~/assets/css/minio.css'
 
 definePageMeta({
@@ -74,6 +74,7 @@ type SearchItem = {
 }
 
 const api = useApi()
+const auth = useAuth()
 const router = useRouter()
 
 const query = ref('')
@@ -111,6 +112,10 @@ const highlightMatch = (text: string) => {
   const matcher = new RegExp(`(${escaped})`, 'gi')
   return text.replace(matcher, '<mark class="highlight">$1</mark>')
 }
+
+onMounted(() => {
+  auth.initAuth()
+})
 </script>
 
 <style scoped>
