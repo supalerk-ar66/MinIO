@@ -37,11 +37,15 @@
           <tbody>
             <tr v-for="item in items" :key="item.id">
               <td>
-                <a href="#" @click.prevent="openItem(item)">{{ item.filename }}</a>
+                <a
+                  href="#"
+                  @click.prevent="openItem(item)"
+                  v-html="highlightMatch(item.filename)"
+                ></a>
               </td>
               <td>{{ item.bucket }} / {{ item.path }}</td>
               <td>{{ formatDate(item.updatedAt) }}</td>
-              <td v-html="item.snippet"></td>
+              <td v-html="highlightMatch(item.snippet)"></td>
             </tr>
           </tbody>
         </table>
@@ -100,4 +104,19 @@ const openItem = (item: SearchItem) => {
 }
 
 const formatDate = (x: string | Date) => new Date(x).toLocaleString()
+
+const highlightMatch = (text: string) => {
+  if (!text || !query.value.trim()) return text
+  const escaped = query.value.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const matcher = new RegExp(`(${escaped})`, 'gi')
+  return text.replace(matcher, '<mark class="highlight">$1</mark>')
+}
 </script>
+
+<style scoped>
+.highlight {
+  background: #fff3bf;
+  padding: 0 2px;
+  border-radius: 2px;
+}
+</style>
